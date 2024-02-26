@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JWT App</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js"
+      integrity="sha512-NQfB/bDaB8kaSXF8E77JjhHG5PM6XVRxvHzkZiwl3ddWCEPBa23T76MuWSwAJdMGJnmQqM0VeY9kFszsrBEFrQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js"
+      integrity="sha512-NQfB/bDaB8kaSXF8E77JjhHG5PM6XVRxvHzkZiwl3ddWCEPBa23T76MuWSwAJdMGJnmQqM0VeY9kFszsrBEFrQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <style>
+      body {
+        background-color: #91b8df;
+      }
+
+      .login-form {
+        display: block;
+        width: 350px;
+        margin: 0 auto;
+        margin-top: 120px;
+        background: white;
+        padding: 30px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px 0px rgba (138, 57, 57, 0.1);
+      }
+
+      .row {
+        text-align: center;
+        padding: 10px;
+      }
+
+      .row label {
+        text-align: left;
+        padding-right: 10px;
+      }
+
+      .btn {
+        min-height: 38px;
+        border-radius: 2px;
+
+        font-size: 12px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container-fluid text-center">
+      <main>
+        <div class="container">
+          <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="#">JWT App</a>
+              <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+              >
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  <li class="nav-item">
+                    <a
+                      class="nav-link active"
+                      aria-current="page"
+                      href="#"
+                      onclick="navigate('http://localhost:3000'); return false;"
+                      >Login</a
+                    >
+                  </li>
+                  <li class="nav-item">
+                    <a
+                      class="nav-link"
+                      href="#"
+                      onclick="navigate('http://localhost:3000/dashboard'); return false;"
+                      >Dashboard</a
+                    >
+                  </li>
+                  <li class="nav-item">
+                    <a
+                      class="nav-link"
+                      href="#"
+                      onclick="navigate('http://localhost:3000/settings'); return false;"
+                      >Settings</a
+                    >
+                  </li>
+
+                  <!-- <li class="nav-item">
+                    <a
+                      class="nav-link"
+                      href="#"
+                      onclick="logout(); return false;"
+                      >Logout</a
+                    >
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </nav>
+          <div class="login-form">
+            <h1 class="h1-row">Login</h1>
+            <div class="error" style="color: blue"></div>
+            <div class="row">
+              <label for="username">Username</label>
+              <input type="text" id="username" placeholder="Enter username" />
+            </div>
+            <div class="row">
+              <label for="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                placeholder="Enter password"
+              />
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary btn-block"
+              onclick="getLogin()"
+            >
+              Login
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      /*
+       * Function to get login
+       */
+      function getLogin() {
+        const data = {
+          username: document.getElementById("username").value,
+          password: document.getElementById("password").value,
+        };
+        axios
+          .post("api/login", data)
+          .then(function (response) {
+            console.log(response);
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+            if (response && response.data && response.data.success) {
+              const token = response.data.token;
+              localStorage.setItem("jwt", token);
+              onLoaded();
+            } else {
+              displayError();
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+            displayError();
+          });
+      }
+
+      /*
+       * Function to display error message
+       *
+       */
+      function displayError() {
+        document.getElementsByClassName("error")[0].style.display =
+          "block !important";
+        document.querySelector("div.error").innerText =
+          "Invalid Username or Password";
+      }
+
+      /**
+       * Function to remove error message 
+       */
+      function removeError() {
+        document.getElementsByClassName("error")[0].style.display =
+          "none !important";
+      }
+
+      /**
+       * Function to call on page Loaded
+       */
+      function onLoaded() {
+        const token = localStorage.getItem("jwt");
+        if (token) {
+          removeError();
+          document.querySelector("div.login-form").innerText =
+            "Login Successful <br> Click Nav bar menu on top, Dashboard or Settings to validate session";
+        }
+      }
+
+      /**
+       * Function to logout
+       */
+      function logout() {
+        localStorage.removeItem("jwt");
+
+        navigate("/");
+      }
+
+      /**
+       * Function to navigate
+       */
+      function navigate(path) {
+        if (checkJWT()) {
+          // Push new state to History API
+          history.pushState(null, null, path);
+
+          // Fetch and update content
+          fetchContent(path);
+        }
+      }
+
+      // Fetch content based on the URL path
+
+      /**
+       * Function to fetch content based on the URL path
+       */
+      function fetchContent(path) {
+        fetch(path)
+          .then((response) => response.text())
+          .then((data) => {
+            // Update the main content with fetched data
+            document.querySelector(".container").innerHTML = data;
+          })
+          .catch((error) => console.error("Error fetching content:", error));
+      }
+
+      /**
+       * Handling navigation backward and forward
+       *  */
+      window.addEventListener("popstate", function (event) {
+        fetchContent(location.pathname);
+      });
+
+      /**
+       * Initially fetch content based on the current URL path
+       *  */
+      fetchContent(location.pathname);
+      // Function to check JWT expiry
+
+      /**
+       *
+       * Function to check JWT expiry
+       * */
+      function checkJWT() {
+        const token = localStorage.getItem("jwt");
+        if (!token) return false;
+
+        const decodedToken = parseJwt(token);
+        const expiry = decodedToken.exp * 1000; // Convert to milliseconds
+
+        if (Date.now() >= expiry) {
+           // Remove the token from localStorage
+           localStorage.removeItem("jwt");
+          // Token expired, reload the page
+          window.location.href = "/";
+        }
+        return true;
+      }
+
+      /**
+       * Function to parse JWT
+       *   */
+      function parseJwt(token) {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map(function (c) {
+              return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join("")
+        );
+
+        return JSON.parse(jsonPayload);
+      }
+    </script>
+  </body>
+</html>
